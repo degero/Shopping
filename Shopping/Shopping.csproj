@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="src\app\app-routing.module.ts" />
+    <None Remove="src\app\components\shoppinglist\shopping-list.component.ts" />
+    <None Remove="src\app\dto\shoppingitem.ts" />
+    <None Remove="src\app\modules\shopping.module.ts" />
+    <None Remove="src\app\services\custom-http.service.ts" />
+    <None Remove="src\app\services\shopping-list.service.ts" />
+    <None Remove="src\app\utility\constants.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shopping.Business\Shopping.Business.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="src\app\app-routing.module.ts" />
+    <TypeScriptCompile Include="src\app\components\shoppinglist\shopping-list.component.ts" />
+    <TypeScriptCompile Include="src\app\dto\shoppingitem.ts" />
+    <TypeScriptCompile Include="src\app\modules\shopping.module.ts" />
+    <TypeScriptCompile Include="src\app\services\custom-http.service.ts" />
+    <TypeScriptCompile Include="src\app\services\shopping-list.service.ts" />
+    <TypeScriptCompile Include="src\app\utility\constants.ts" />
+  </ItemGroup>
+
+</Project>
