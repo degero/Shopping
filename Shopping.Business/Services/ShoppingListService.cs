@@ -11,7 +11,12 @@ namespace Shopping.Business.Services
         {
             return new List<ShoppingItem>
             {
-                new ShoppingItem { Name = "Carrots"}
+                new ShoppingItem { Id= 1, Name = "Carrots"},
+                new ShoppingItem { Id= 2, Name = "Bananas"},
+                new ShoppingItem { Id =3, Name = "Eggplants"},
+                new ShoppingItem { Id= 4, Name = "Adult Daipers"},
+                new ShoppingItem { Id= 5, Name = "Shotgun"},
+                new ShoppingItem { Id= 6, Name = "AK47"}
             };
         }
     }

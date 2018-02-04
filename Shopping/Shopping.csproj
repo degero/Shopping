@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <None Remove="src\app\app-routing.module.ts" />
+    <None Remove="src\app\components\shoppingitem\shopping-item.component.ts" />
     <None Remove="src\app\components\shoppinglist\shopping-list.component.ts" />
     <None Remove="src\app\dto\shoppingitem.ts" />
     <None Remove="src\app\modules\shopping.module.ts" />
@@ -33,6 +34,7 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="src\app\app-routing.module.ts" />
+    <TypeScriptCompile Include="src\app\components\shoppingitem\shopping-item.component.ts" />
     <TypeScriptCompile Include="src\app\components\shoppinglist\shopping-list.component.ts" />
     <TypeScriptCompile Include="src\app\dto\shoppingitem.ts" />
     <TypeScriptCompile Include="src\app\modules\shopping.module.ts" />

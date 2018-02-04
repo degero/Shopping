@@ -27,9 +27,10 @@ namespace Shopping.Controllers
 
     // GET api/values/5
     [HttpGet("{id}")]
-    public string Get(int id)
+    public ShoppingItem Get(int id)
     {
-      return "value";
+      var items =_shoppingListService.GetList();
+      return items.Where(r => r.Id == id).FirstOrDefault();
     }
 
     // POST api/values

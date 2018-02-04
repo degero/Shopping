@@ -16,4 +16,7 @@ export class ShoppingListService {
     return this.customHttp.get(Constants.URL_ShoppingList_List) as Observable<ShoppingItem[]>;
   }
 
+  public getShoppingItem(id: string):Observable<ShoppingItem> {
+    return this.customHttp.get(Constants.URL_ShoppingList_List + "/" + id ) as Observable<ShoppingItem>;
+  }
 }

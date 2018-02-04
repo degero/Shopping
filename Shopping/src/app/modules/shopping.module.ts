@@ -4,16 +4,21 @@ import { HttpClientModule } from '@angular/common/http';
 import { ShoppingListComponent } from '../components/shoppinglist/shopping-list.component';
 import { ShoppingListService } from '../services/shopping-list.service';
 import { CustomHttpService } from '../services/custom-http.service';
+import { ShoppingItemComponent } from '../components/shoppingitem/shopping-item.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
-    ShoppingListComponent
+    ShoppingListComponent,
+    ShoppingItemComponent
   ],
   exports: [
-    ShoppingListComponent
-  ],
+    ShoppingListComponent,
+    ShoppingItemComponent
+  ],  
   imports: [
     HttpClientModule,
+    FormsModule,
     BrowserModule
   ],
   providers: [CustomHttpService, ShoppingListService],
