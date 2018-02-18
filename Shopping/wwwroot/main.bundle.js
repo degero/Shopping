@@ -87,7 +87,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<!--The content below is only a placeholder and can be replaced.-->\r\n<h1>Shopping List</h1>\r\n<router-outlet></router-outlet>\r\n\r\n<a routerLink=\"shoppinglist\">Home</a>\r\n<a routerLink=\"configuration\">Configuration</a>\r\n"
+module.exports = "<!--The content below is only a placeholder and can be replaced.-->\r\n<h1>Shopping List</h1>\r\n<button (click)=\"login()\">login</button>\r\n<button (click)=\"logout()\">logout</button>\r\n<button (click)=\"getData()\">getData</button>\r\n\r\n<router-outlet></router-outlet>\r\n\r\n<a routerLink=\"shoppinglist\">Home</a>\r\n<a routerLink=\"configuration\">Configuration</a>\r\n"
 
 /***/ }),
 
@@ -107,11 +107,40 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = __webpack_require__("../../../core/esm5/core.js");
+var angular_auth_oidc_client_1 = __webpack_require__("../../../../angular-auth-oidc-client/modules/angular-auth-oidc-client.es5.js");
+var http_1 = __webpack_require__("../../../common/esm5/http.js");
 var AppComponent = /** @class */ (function () {
-    function AppComponent() {
+    function AppComponent(oidcSecurityService, http) {
+        var _this = this;
+        this.oidcSecurityService = oidcSecurityService;
+        this.http = http;
         this.title = 'app';
+        if (this.oidcSecurityService.moduleSetup) {
+            this.doCallbackLogicIfRequired();
+        }
+        else {
+            this.oidcSecurityService.onModuleSetup.subscribe(function () {
+                _this.doCallbackLogicIfRequired();
+            });
+        }
     }
-    AppComponent.prototype.ngOnInit = function () {
+    AppComponent.prototype.doCallbackLogicIfRequired = function () {
+        if (window.location.hash) {
+            this.oidcSecurityService.authorizedCallback();
+        }
+    };
+    AppComponent.prototype.login = function () {
+        this.oidcSecurityService.authorize();
+    };
+    AppComponent.prototype.logout = function () {
+        this.oidcSecurityService.logoff();
+    };
+    AppComponent.prototype.getData = function () {
+        var token = this.oidcSecurityService.getToken();
+        var headers = new http_1.HttpHeaders({ "Authorization": "Bearer " + token });
+        this.http.get("http://localhost:60136/values", { headers: headers }).subscribe(function () {
+            alert("got data");
+        });
     };
     AppComponent = __decorate([
         core_1.Component({
@@ -119,7 +148,8 @@ var AppComponent = /** @class */ (function () {
             template: __webpack_require__("../../../../../src/app/app.component.html"),
             styles: [__webpack_require__("../../../../../src/app/app.component.css")]
         }),
-        __metadata("design:paramtypes", [])
+        __metadata("design:paramtypes", [angular_auth_oidc_client_1.OidcSecurityService,
+            http_1.HttpClient])
     ], AppComponent);
     return AppComponent;
 }());
@@ -139,20 +169,79 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var platform_browser_1 = __webpack_require__("../../../platform-browser/esm5/platform-browser.js");
 var core_1 = __webpack_require__("../../../core/esm5/core.js");
 var app_component_1 = __webpack_require__("../../../../../src/app/app.component.ts");
 var forms_1 = __webpack_require__("../../../forms/esm5/forms.js");
-var http_1 = __webpack_require__("../../../http/esm5/http.js");
 var app_routing_module_1 = __webpack_require__("../../../../../src/app/app-routing.module.ts");
 var shopping_list_component_1 = __webpack_require__("../../../../../src/app/components/shoppinglist/shopping-list.component.ts");
 var shopping_item_component_1 = __webpack_require__("../../../../../src/app/components/shoppingitem/shopping-item.component.ts");
 var custom_http_service_1 = __webpack_require__("../../../../../src/app/services/custom-http.service.ts");
 var shopping_list_service_1 = __webpack_require__("../../../../../src/app/services/shopping-list.service.ts");
-var http_2 = __webpack_require__("../../../common/esm5/http.js");
+var http_1 = __webpack_require__("../../../common/esm5/http.js");
+var angular_auth_oidc_client_1 = __webpack_require__("../../../../angular-auth-oidc-client/modules/angular-auth-oidc-client.es5.js");
+function loadConfig(oidcConfigService) {
+    console.log('APP_INITIALIZER STARTING');
+    oidcConfigService.clientConfiguration = {
+        "stsServer": "https://localhost:44300",
+        "redirect_url": "http://localhost:63700",
+        "client_id": "js",
+        "response_type": "id_token token",
+        "scope": "openid profile email api",
+        "post_logout_redirect_uri": "http://localhost:67300",
+        "start_checksession": true,
+        "silent_renew": true,
+        "startup_route": "/",
+        "forbidden_route": "/forbidden",
+        "unauthorized_route": "/unauthorized",
+        "log_console_warning_active": true,
+        "log_console_debug_active": true,
+        "max_id_token_iat_offset_allowed_in_seconds": "10",
+        "apiServer": "http://localhost:60136/",
+        "apiFileServer": "http://localhost:60136/"
+    };
+    return function () { return oidcConfigService.load_using_stsServer('https://localhost:44300'); };
+}
+exports.loadConfig = loadConfig;
 var AppModule = /** @class */ (function () {
-    function AppModule() {
+    function AppModule(oidcSecurityService, oidcConfigService) {
+        var _this = this;
+        this.oidcSecurityService = oidcSecurityService;
+        this.oidcConfigService = oidcConfigService;
+        this.oidcConfigService.onConfigurationLoaded.subscribe(function () {
+            var openIDImplicitFlowConfiguration = new angular_auth_oidc_client_1.OpenIDImplicitFlowConfiguration();
+            openIDImplicitFlowConfiguration.stsServer = _this.oidcConfigService.clientConfiguration.stsServer;
+            openIDImplicitFlowConfiguration.redirect_url = _this.oidcConfigService.clientConfiguration.redirect_url;
+            // The Client MUST validate that the aud (audience) Claim contains its client_id value registered at the Issuer
+            // identified by the iss (issuer) Claim as an audience.
+            // The ID Token MUST be rejected if the ID Token does not list the Client as a valid audience,
+            // or if it contains additional audiences not trusted by the Client.
+            openIDImplicitFlowConfiguration.client_id = _this.oidcConfigService.clientConfiguration.client_id;
+            openIDImplicitFlowConfiguration.response_type = _this.oidcConfigService.clientConfiguration.response_type;
+            openIDImplicitFlowConfiguration.scope = _this.oidcConfigService.clientConfiguration.scope;
+            openIDImplicitFlowConfiguration.post_logout_redirect_uri = _this.oidcConfigService.clientConfiguration.post_logout_redirect_uri;
+            openIDImplicitFlowConfiguration.start_checksession = _this.oidcConfigService.clientConfiguration.start_checksession;
+            openIDImplicitFlowConfiguration.silent_renew = _this.oidcConfigService.clientConfiguration.silent_renew;
+            openIDImplicitFlowConfiguration.post_login_route = _this.oidcConfigService.clientConfiguration.startup_route;
+            // HTTP 403
+            openIDImplicitFlowConfiguration.forbidden_route = _this.oidcConfigService.clientConfiguration.forbidden_route;
+            // HTTP 401
+            openIDImplicitFlowConfiguration.unauthorized_route = _this.oidcConfigService.clientConfiguration.unauthorized_route;
+            openIDImplicitFlowConfiguration.log_console_warning_active = _this.oidcConfigService.clientConfiguration.log_console_warning_active;
+            openIDImplicitFlowConfiguration.log_console_debug_active = _this.oidcConfigService.clientConfiguration.log_console_debug_active;
+            // id_token C8: The iat Claim can be used to reject tokens that were issued too far away from the current time,
+            // limiting the amount of time that nonces need to be stored to prevent attacks.The acceptable range is Client specific.
+            openIDImplicitFlowConfiguration.max_id_token_iat_offset_allowed_in_seconds =
+                _this.oidcConfigService.clientConfiguration.max_id_token_iat_offset_allowed_in_seconds;
+            var authWellKnownEndpoints = new angular_auth_oidc_client_1.AuthWellKnownEndpoints();
+            authWellKnownEndpoints.setWellKnownEndpoints(_this.oidcConfigService.wellKnownEndpoints);
+            _this.oidcSecurityService.setupModule(openIDImplicitFlowConfiguration, authWellKnownEndpoints);
+        });
+        console.log('APP STARTING');
     }
     AppModule = __decorate([
         core_1.NgModule({
@@ -162,15 +251,25 @@ var AppModule = /** @class */ (function () {
                 shopping_item_component_1.ShoppingItemComponent
             ],
             imports: [
-                http_2.HttpClientModule,
-                http_1.HttpModule,
+                http_1.HttpClientModule,
                 forms_1.FormsModule,
                 platform_browser_1.BrowserModule,
                 app_routing_module_1.AppRoutingModule,
+                angular_auth_oidc_client_1.AuthModule.forRoot()
+                //ShoppingModule
             ],
-            providers: [custom_http_service_1.CustomHttpService, shopping_list_service_1.ShoppingListService],
+            providers: [custom_http_service_1.CustomHttpService, shopping_list_service_1.ShoppingListService,
+                angular_auth_oidc_client_1.OidcConfigService,
+                {
+                    provide: core_1.APP_INITIALIZER,
+                    useFactory: loadConfig,
+                    deps: [angular_auth_oidc_client_1.OidcConfigService],
+                    multi: true
+                }],
             bootstrap: [app_component_1.AppComponent]
-        })
+        }),
+        __metadata("design:paramtypes", [angular_auth_oidc_client_1.OidcSecurityService,
+            angular_auth_oidc_client_1.OidcConfigService])
     ], AppModule);
     return AppModule;
 }());
@@ -182,7 +281,7 @@ exports.AppModule = AppModule;
 /***/ "../../../../../src/app/components/shoppingitem/shopping-item.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div *ngIf=\"ShoppingItem\">\r\n  <h2>{{ ShoppingItem.Name }} Details</h2>\r\n  <div><span>id: </span>{{ShoppingItem.Id}}</div>\r\n  <div>\r\n    <form (ngSubmit)=\"submit()\" #shoppingForm=\"ngForm\">\r\n      <div class=\"form-group\">\r\n        <label for=\"name\">Name</label>\r\n        <input type=\"text\" class=\"form-input\" id=\"name\" name=\"name\" #name=\"ngModel\" required minlength=\"4\" [(ngModel)]=\"ShoppingItem.Name\" />\r\n        <div *ngIf=\"name.errors.required\">\r\n          Name is required.\r\n        </div>\r\n        <div *ngIf=\"name.errors.minlength\">\r\n          Name must be at least 4 characters long.\r\n        </div>\r\n        <div *ngIf=\"name.errors.forbiddenName\">\r\n          Name cannot be Bob.\r\n        </div>\r\n\r\n        <!-- reactive form layout -->\r\n        <!-- <input type=\"text\" class=\"form-control\" formControlName=\"name\" required />\r\n    <div *ngIf=\"name.invalid && (name.dirty || name.touched)\"\r\n         class=\"alert alert-danger\">\r\n      <div *ngIf=\"name.errors.required\">\r\n        Name is required.\r\n      </div>\r\n      <div *ngIf=\"name.errors.minlength\">\r\n        Name must be at least 4 characters long.\r\n      </div>\r\n      <div *ngIf=\"name.errors.forbiddenName\">\r\n        Name cannot be Bob.\r\n      </div>\r\n    </div>-->\r\n\r\n        </div>\r\n        <button type=\"submit\" class=\"btn btn-success\" [disabled]=\"!shoppingForm.form.valid\">Submit</button>\r\n      </form>\r\n    </div>\r\n    <button (click)=\"back()\">go back</button>\r\n  </div>\r\n"
+module.exports = "<div *ngIf=\"ShoppingItem\">\r\n  <h2>{{ ShoppingItem.Name }} Details</h2>\r\n  <div><span>id: </span>{{ShoppingItem.Id}}</div>\r\n  <div>\r\n    <form (ngSubmit)=\"submit()\" #shoppingForm=\"ngForm\">\r\n      <div class=\"form-group\">\r\n        <label for=\"name\">Name</label>\r\n        <input type=\"text\" class=\"form-input\" id=\"name\" name=\"name\" #name=\"ngModel\" required minlength=\"4\" [(ngModel)]=\"ShoppingItem.Name\" />\r\n        <div *ngIf=\"name.errors && name.errors.required\">\r\n          Name is required.\r\n        </div>\r\n        <div *ngIf=\"name.errors && name.errors.minlength\">\r\n          Name must be at least 4 characters long.\r\n        </div>\r\n        <div *ngIf=\"name.errors && name.errors.forbiddenName\">\r\n          Name cannot be Bob.\r\n        </div>\r\n\r\n        <!-- reactive form layout -->\r\n        <!-- <input type=\"text\" class=\"form-control\" formControlName=\"name\" required />\r\n    <div *ngIf=\"name.invalid && (name.dirty || name.touched)\"\r\n         class=\"alert alert-danger\">\r\n      <div *ngIf=\"name.errors.required\">\r\n        Name is required.\r\n      </div>\r\n      <div *ngIf=\"name.errors.minlength\">\r\n        Name must be at least 4 characters long.\r\n      </div>\r\n      <div *ngIf=\"name.errors.forbiddenName\">\r\n        Name cannot be Bob.\r\n      </div>\r\n    </div>-->\r\n\r\n        </div>\r\n        <button type=\"submit\" class=\"btn btn-success\" [disabled]=\"!shoppingForm.form.valid\">Submit</button>\r\n      </form>\r\n    </div>\r\n    <button (click)=\"back()\">go back</button>\r\n  </div>\r\n"
 
 /***/ }),
 
