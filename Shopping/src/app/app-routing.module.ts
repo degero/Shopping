@@ -4,7 +4,7 @@ import { ShoppingListComponent } from './components/shoppinglist/shopping-list.c
 import { ShoppingItemComponent } from './components/shoppingitem/shopping-item.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/shoppinglist', pathMatch: 'full' },
+  { path: '', redirectTo: '/', pathMatch: 'full' },
   {
     path: 'configuration',
     loadChildren: 'app/configuration/configuration.module#ConfigurationModule'
